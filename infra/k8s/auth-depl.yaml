@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   name: auth-depl
 spec:
+  progressDeadlineSeconds: 300
   replicas: 1
   selector:
     matchLabels:

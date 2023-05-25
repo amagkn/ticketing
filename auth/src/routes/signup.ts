@@ -37,7 +37,7 @@ router.post(
 
     const userJwt = jwt.sign(
       { id: user.id, email: user.email },
-      "i_am_Dmitrii"
+      process.env.JWT_KEY!
     );
 
     req.session = { jwt: userJwt };

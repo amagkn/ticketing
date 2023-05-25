@@ -1,28 +1,25 @@
-import express, { NextFunction, Request, Response } from "express";
-import { body, validationResult } from "express-validator";
+import express, { Request, Response } from "express";
+import { body } from "express-validator";
 import jwt from "jsonwebtoken";
-import { RequestValidationError } from "../errors/request-validation-error";
 import { User } from "../models/user";
 import { BadRequestError } from "../errors/bad-request-error";
+import { validateRequest } from "../middlewares/validate-request";
 
 const router = express.Router();
 
+const validationRules = [
+  body("email").isEmail().withMessage("Email must be valid"),
+  body("password")
+    .trim()
+    .isLength({ min: 4, max: 20 })
+    .withMessage("Password must be between 4 and 20 characters"),
+];
+
 router.post(
   "/api/users/signup",
-  [
-    body("email").isEmail().withMessage("Email must be valid"),
-    body("password")
-      .trim()
-      .isLength({ min: 4, max: 20 })
-      .withMessage("Password must be between 4 and 20 characters"),
-  ],
-  async (req: Request, res: Response, next: NextFunction) => {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      throw new RequestValidationError(errors.array());
-    }
-
+  validationRules,
+  validateRequest,
+  async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
     const existingUser = await User.findOne({ email });
